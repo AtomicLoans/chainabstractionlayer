@@ -71,9 +71,9 @@ export default class Chain {
 
     const block = await this.client.getMethod('getBlockByHash')(blockHash, includeTx)
 
-    if (!this.validateBlock(block)) {
-      throw new InvalidProviderResponseError('Provider returned an invalid block')
-    }
+    // if (!this.validateBlock(block)) {
+    //   throw new InvalidProviderResponseError('Provider returned an invalid block')
+    // }
 
     return block
   }
@@ -102,10 +102,10 @@ export default class Chain {
 
     const valid = this.validateBlock(block)
 
-    if (!valid) {
-      const errors = this.validateBlock.errors
-      throw new InvalidProviderResponseError(`Provider returned an invalid block, ${errors[0].dataPath} ${errors[0].message}`)
-    }
+    // if (!valid) {
+    //   const errors = this.validateBlock.errors
+    //   throw new InvalidProviderResponseError(`Provider returned an invalid block, ${errors[0].dataPath} ${errors[0].message}`)
+    // }
 
     return block
   }
@@ -146,14 +146,14 @@ export default class Chain {
 
     const transaction = await this.client.getMethod('getTransactionByHash')(txHash)
 
-    if (transaction) {
-      const valid = this.validateTransaction(transaction)
+    // if (transaction) {
+    //   const valid = this.validateTransaction(transaction)
 
-      if (!valid) {
-        const errors = this.validateTransaction.errors
-        throw new InvalidProviderResponseError(`Provider returned an invalid transaction: ${errors[0].dataPath} ${errors[0].message}`)
-      }
-    }
+    //   if (!valid) {
+    //     const errors = this.validateTransaction.errors
+    //     throw new InvalidProviderResponseError(`Provider returned an invalid transaction: ${errors[0].dataPath} ${errors[0].message}`)
+    //   }
+    // }
 
     return transaction
   }
@@ -241,6 +241,10 @@ export default class Chain {
 
   async erc20Approve (spender, value) {
     return this.client.getMethod('erc20Approve')(spender, value)
+  }
+
+  async getErc20Allowance (owner, spender) {
+    return this.client.getMethod('getErc20Allowance')(owner, spender)
   }
 
   async getTransactionReceipt (txHash) {

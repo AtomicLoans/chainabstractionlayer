@@ -120,6 +120,14 @@ export default class EthereumErc20Provider extends Provider {
     const decimals = await this.getMethod('jsonrpc')('eth_call', { data: functionSignature, to: ensure0x(this._contractAddress) }, 'latest')
     return parseInt(decimals, 16)
   }
+
+  async getErc20Allowance (owner, spender) {
+    const functionSignature = '0xdd62ed3e'
+    const encodedOwner = padHexStart(removeAddress0x(owner), 64)
+    const encodedSpender = padHexStart(removeAddress0x(spender), 64)
+    const allowance = await this.getMethod('jsonrpc')('eth_call', { data: functionSignature + encodedOwner + encodedSpender, to: ensure0x(this._contractAddress) }, 'latest')
+    return parseInt(allowance, 16)
+  }
 }
 
 EthereumErc20Provider.version = version

@@ -7,3 +7,11 @@ bitcoin.addProvider(new BitcoinRpcProvider('http://localhost:18332', 'bitcoin', 
 ;(async () => {
   console.log(await bitcoin.chain.generateBlock(1))
 })()
+
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+while(true) {
+  console.log(await bitcoin.chain.generateBlock(1))
+  sleep(60*1000)
+}

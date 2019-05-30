@@ -11,8 +11,8 @@ export default class LoanFund {
     return this.client.getMethod('initiateLoanFund')(secretHashes, maxLoanAmount, minLoanDuration, maxLoanDuration, interestRate, liquidationFeeRate, aCoinPubKey, minCollateralizationRatio, automated, lenderAuto, autoSecretHashes)
   }
 
-  async requestLoan (initiationTxHash, amount, secretHashes, loanDuration, aCoinPubKey) {
-    return this.client.getMethod('requestLoan')(initiationTxHash, amount, secretHashes, loanDuration, aCoinPubKey)
+  async requestLoan (initiationTxHash, amount, secretHashes, approveDuration, loanDuration, acceptDuration, biddingDuration, biddingTimeout, biddingRefund, aCoinPubKey) {
+    return this.client.getMethod('requestLoan')(initiationTxHash, amount, secretHashes, approveDuration, loanDuration, acceptDuration, biddingDuration, biddingTimeout, biddingRefund, aCoinPubKey)
   }
 
   async addSecretHashesLoanFund (initiationTxHash, secretHashes) {

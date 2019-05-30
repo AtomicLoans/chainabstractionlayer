@@ -52,16 +52,16 @@ export default class Loan {
     return this.client.getMethod('bidLoan')(contractAddress, secretHashC, bidValue, aCoinAddress)
   }
 
-  provideSignatureLoan (contractAddress, signature) {
-    return this.client.getMethod('provideSignatureLoan')(contractAddress, signature)
+  provideSignatureLoan (contractAddress, refundableSignature, seizableSignature) {
+    return this.client.getMethod('provideSignatureLoan')(contractAddress, refundableSignature, seizableSignature)
   }
 
   provideSecretLoan (contractAddress, secret) {
     return this.client.getMethod('provideSecretLoan')(contractAddress, secret)
   }
 
-  withdrawLiquidatedCollateralLoan (contractAddress, secretA2, secretB2, secretC) {
-    return this.client.getMethod('withdrawLiquidatedCollateralLoan')(contractAddress, secretA2, secretB2, secretC)
+  withdrawBidLoan (contractAddress, secretA2, secretB2, secretC) {
+    return this.client.getMethod('withdrawBidLoan')(contractAddress, secretA2, secretB2, secretC)
   }
 
   refundBidLoan (contractAddress) {
@@ -108,6 +108,14 @@ export default class Loan {
     return this.client.getMethod('getBorrowerPubKey')(contractAddress, block)
   }
 
+  async getBidderPubKeyHash (contractAddress, block) {
+    return this.client.getMethod('getBidderPubKeyHash')(contractAddress, block)
+  }
+
+  async getCreatedAt (contractAddress, block) {
+    return this.client.getMethod('getCreatedAt')(contractAddress, block)
+  }
+
   async getApproveExpiration (contractAddress, block) {
     return this.client.getMethod('getApproveExpiration')(contractAddress, block)
   }
@@ -124,6 +132,18 @@ export default class Loan {
     return this.client.getMethod('getBiddingExpiration')(contractAddress, block)
   }
 
+  async getSecretA2 (contractAddress, block) {
+    return this.client.getMethod('getSecretA2')(contractAddress, block)
+  }
+
+  async getSecretB2 (contractAddress, block) {
+    return this.client.getMethod('getSecretB2')(contractAddress, block)
+  }
+
+  async getSecretC (contractAddress, block) {
+    return this.client.getMethod('getSecretC')(contractAddress, block)
+  }
+
   async getSecretHashA1 (contractAddress, block) {
     return this.client.getMethod('getSecretHashA1')(contractAddress, block)
   }
@@ -138,5 +158,21 @@ export default class Loan {
 
   async getSecretHashB2 (contractAddress, block) {
     return this.client.getMethod('getSecretHashB2')(contractAddress, block)
+  }
+
+  async getSecretHashC (contractAddress, block) {
+    return this.client.getMethod('getSecretHashC')(contractAddress, block)
+  }
+
+  async getCurrentBid (contractAddress, block) {
+    return this.client.getMethod('getCurrentBid')(contractAddress, block)
+  }
+
+  async getBiddingTimeoutExpiration (contractAddress, block) {
+    return this.client.getMethod('getBiddingTimeoutExpiration')(contractAddress, block)
+  }
+
+  async getBiddingRefundExpiration (contractAddress, block) {
+    return this.client.getMethod('getBiddingRefundExpiration')(contractAddress, block)
   }
 }

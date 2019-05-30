@@ -106,7 +106,7 @@
 const { Client, providers, crypto } = Bundle
 const bitcoinNetworks = providers.bitcoin.networks
 const bitcoin = new Client()
-bitcoin.addProvider(new providers.bitcoin.BitcoinBitcoreRpcProvider('https://localhost:18332', 'bitcoin', 'local321'))
+bitcoin.addProvider(new providers.bitcoin.BitcoinBitcoreRpcProvider('https://atomicloans.io/bitcoinregtestrpc/', 'bitcoin', 'local321'))
 bitcoin.addProvider(new providers.bitcoin.BitcoinLedgerProvider({ network: bitcoinNetworks.bitcoin_testnet, segwit: false }))
 bitcoin.addProvider(new providers.bitcoin.BitcoinSwapProvider({ network: bitcoinNetworks.bitcoin_testnet }))
 

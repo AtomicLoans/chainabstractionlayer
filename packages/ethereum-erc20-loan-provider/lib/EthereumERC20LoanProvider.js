@@ -254,20 +254,27 @@ export default class EthereumERC20LoanProvider extends Provider {
     return this.getMethod('sendTransaction')(contractAddress, 0, '0x92b0c7ab' + secretHashC + encodedBidValue + encodedACoinAddress)
   }
 
-  provideSignatureLoan (contractAddress, signature) {
-    const encodedSignature1 = padHexStart(signature.substring(0, 64), 64)
-    const encodedSignature2 = padHexStart(signature.substring(64, 128), 64)
-    const encodedSignature3 = padHexStart(signature.substring(128), 64)
+  provideSignatureLoan (contractAddress, refundableSignature, seizableSignature) {
+    const encodedRefundableSignature1 = padHexStart(refundableSignature.substring(0, 64), 64)
+    const encodedRefundableSignature2 = padHexStart(refundableSignature.substring(64, 128), 64)
+    const encodedRefundableSignature3 = padHexStart(refundableSignature.substring(128), 64)
 
-    return this.getMethod('sendTransaction')(contractAddress, 0, '0x0c57e902' + encodedSignature1 + encodedSignature2 + encodedSignature3)
+    const encodedSeizableSignature1 = padHexStart(seizableSignature.substring(0, 64), 64)
+    const encodedSeizableSignature2 = padHexStart(seizableSignature.substring(64, 128), 64)
+    const encodedSeizableSignature3 = padHexStart(seizableSignature.substring(128), 64)
+
+    console.log('provideSignatureValues')
+    console.log(contractAddress, refundableSignature, seizableSignature)
+
+    return this.getMethod('sendTransaction')(contractAddress, 0, '0xe05a53a9' + encodedRefundableSignature1 + encodedRefundableSignature2 + encodedRefundableSignature3 + encodedSeizableSignature1 + encodedSeizableSignature2 + encodedSeizableSignature3)
   }
 
   provideSecretLoan (contractAddress, secret) {
     return this.getMethod('sendTransaction')(contractAddress, 0, '0x51db70dc' + secret)
   }
 
-  withdrawLiquidatedCollateralLoan (contractAddress, secretA2, secretB2, secretC) {
-    return this.getMethod('sendTransaction')(contractAddress, 0, '0xf5003d37' + secretA2 + secretB2 + secretC)
+  withdrawBidLoan (contractAddress, secretA2, secretB2, secretC) {
+    return this.getMethod('sendTransaction')(contractAddress, 0, '0x48ae7acb' + secretA2 + secretB2 + secretC)
   }
 
   refundBidLoan (contractAddress) {
@@ -315,21 +322,32 @@ export default class EthereumERC20LoanProvider extends Provider {
   }
 
   async getSignatureLoan (contractAddress, type, block) {
-    let functionSignature
+    let refundableSignature
+    let seizableSignature
     if (type === 'borrower') {
-      functionSignature = '0xd5f2eef9'
+      refundableSignature = '0xc05cad17'
+      seizableSignature = '0x6e092962'
     } else if (type === 'lender') {
-      functionSignature = '0xaf0e7458'
+      refundableSignature = '0x2ecd9a84'
+      seizableSignature = '0x7daf2dde'
     } else {
-      functionSignature = '0x9e264051'
+      refundableSignature = '0x5e07758c'
+      seizableSignature = '0xf935d407'
     }
-    let signature = []
+    let refundableSignatures = []
     for (let i = 0; i < 3; i++) {
-      const signaturePart = await this.getMethod('jsonrpc')('eth_call', { data: functionSignature + padHexStart(i.toString(16), 64), to: ensure0x(contractAddress) }, ensureBlockFormat(block))
-      signature.push(signaturePart)
+      const refundableSignaturePart = await this.getMethod('jsonrpc')('eth_call', { data: refundableSignature + padHexStart(i.toString(16), 64), to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+      refundableSignatures.push(refundableSignaturePart)
     }
-    signature[2] = padHexStart(parseInt(signature[2], 16).toString(16))
-    return signature.join('')
+    refundableSignatures[2] = padHexStart(parseInt(refundableSignatures[2], 16).toString(16))
+
+    let seizableSignatures = []
+    for (let i = 0; i < 3; i++) {
+      const seizableSignaturePart = await this.getMethod('jsonrpc')('eth_call', { data: seizableSignature + padHexStart(i.toString(16), 64), to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+      seizableSignatures.push(seizableSignaturePart)
+    }
+    seizableSignatures[2] = padHexStart(parseInt(seizableSignatures[2], 16).toString(16))
+    return { refundableSignature: refundableSignatures.join(''), seizableSignature: seizableSignatures.join('') }
   }
 
   async getBorrowerPubKey (contractAddress, block) {
@@ -338,6 +356,17 @@ export default class EthereumERC20LoanProvider extends Provider {
     const prefixBorrowerPubKey = await this.getMethod('jsonrpc')('eth_call', { data: prefixFunctionSignature, to: ensure0x(contractAddress) }, ensureBlockFormat(block))
     const suffixBorrowerPubKey = await this.getMethod('jsonrpc')('eth_call', { data: suffixFunctionSignature, to: ensure0x(contractAddress) }, ensureBlockFormat(block))
     return padHexStart(parseInt(prefixBorrowerPubKey, 16).toString(16)) + suffixBorrowerPubKey
+  }
+
+  async getBidderPubKeyHash (contractAddress, block) {
+    const pubKeyFunctionSignature = '0x3d4130a2'
+    const bidderPubKeyHash = await this.getMethod('jsonrpc')('eth_call', { data: pubKeyFunctionSignature, to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+    return bidderPubKeyHash.substring(24, 64)
+  }
+
+  async getCreatedAt (contractAddress, block) {
+    const approveExpiration = await this.getMethod('jsonrpc')('eth_call', { data: '0xbf1d4cad', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+    return parseInt(approveExpiration, 16)
   }
 
   async getApproveExpiration (contractAddress, block) {
@@ -360,6 +389,18 @@ export default class EthereumERC20LoanProvider extends Provider {
     return parseInt(biddingExpiration, 16)
   }
 
+  async getSecretA2 (contractAddress, block) {
+    return this.getMethod('jsonrpc')('eth_call', { data: '0x4549987a', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+  }
+
+  async getSecretB2 (contractAddress, block) {
+    return this.getMethod('jsonrpc')('eth_call', { data: '0xbc98859a', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+  }
+
+  async getSecretC (contractAddress, block) {
+    return this.getMethod('jsonrpc')('eth_call', { data: '0x3dcd4125', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+  }
+
   async getSecretHashA1 (contractAddress, block) {
     return this.getMethod('jsonrpc')('eth_call', { data: '0xa0015613', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
   }
@@ -374,6 +415,25 @@ export default class EthereumERC20LoanProvider extends Provider {
 
   async getSecretHashB2 (contractAddress, block) {
     return this.getMethod('jsonrpc')('eth_call', { data: '0xa4e10668', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+  }
+
+  async getSecretHashC (contractAddress, block) {
+    return this.getMethod('jsonrpc')('eth_call', { data: '0x54894465', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+  }
+
+  async getCurrentBid (contractAddress, block) {
+    const currentBid = await this.getMethod('jsonrpc')('eth_call', { data: '0xdef18101', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+    return parseInt(currentBid, 16)
+  }
+
+  async getBiddingTimeoutExpiration (contractAddress, block) {
+    const biddingTimeoutExpiration = await this.getMethod('jsonrpc')('eth_call', { data: '0x96c5e2ac', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+    return parseInt(biddingTimeoutExpiration, 16)
+  }
+
+  async getBiddingRefundExpiration (contractAddress, block) {
+    const biddingRefundExpiration = await this.getMethod('jsonrpc')('eth_call', { data: '0x4ddc54b2', to: ensure0x(contractAddress) }, ensureBlockFormat(block))
+    return parseInt(biddingRefundExpiration, 16)
   }
 }
 

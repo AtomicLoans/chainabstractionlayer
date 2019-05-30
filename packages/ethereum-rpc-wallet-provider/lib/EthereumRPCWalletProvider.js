@@ -78,6 +78,10 @@ export default class EthereumRPCWalletProvider extends Provider {
       chainId: networkId
     }
 
+    console.log('gasPrice and gasLimit')
+    console.log(gasPrice)
+    console.log(gasLimit)
+
     const tx = new EthereumTx(txParams)
     tx.sign(this.wallet.getPrivateKey())
     const serializedTx = tx.serialize()
